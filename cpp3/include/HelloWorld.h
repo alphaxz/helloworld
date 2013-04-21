@@ -4,8 +4,9 @@
 /*! prints "hello world" to the standard output */
 class HelloWorld
 {
-    /*! prints "hello world" to the standard output */
-    void Do (void);
+    public:
+        /*! prints "hello world" to the standard output */
+        void Do (void);
 };
 
 #endif /* __HELLOWORLD_H__ */

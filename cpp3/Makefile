@@ -5,6 +5,9 @@ LDFLAGS=
 EXECDIR=exec
 EXEC=$(addprefix $(EXECDIR)/, helloworld)
 
+INCDIR=include
+INCFLAGS=$(foreach d, $(INCDIR), -I$d)
+
 SRCDIR=source
 SRC=$(wildcard $(SRCDIR)/*.cpp)
 
@@ -22,7 +25,7 @@ mrproper: clean
 	@rm -rf $(EXEC)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@$(CC) -o $@ -c $< $(CFLAGS)
+	@$(CC) -o $@ -c $< $(CFLAGS) $(INCFLAGS)
 
 $(EXEC): $(OBJ) 
 	@$(CC) -o $@ $^ $(LDFLAGS)
