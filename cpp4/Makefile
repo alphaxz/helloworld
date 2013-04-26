@@ -3,7 +3,8 @@ CFLAGS=-W -Wall -ansi -pedantic
 LDFLAGS=
 
 LIBDIR=lib
-LIB=libhelloworld.so
+LIBNAME=helloworld
+LIB=$(addprefix $(LIBDIR)/, libhelloworld.so)
 
 INCDIR=include
 INCFLAGS=$(foreach d, $(INCDIR), -I$d)
@@ -27,7 +28,7 @@ clean:
 	@rm -rf $(OBJ) $(TESTOBJ)
 
 mrproper: clean
-	@rm -rf $(addprefix $(LIBDIR)/, $(LIB)) $(TESTEXEC)
+	@rm -rf $(LIB) $(TESTEXEC)
 
 doc:
 	@doxygen Doxyfile
@@ -36,13 +37,13 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@$(CC) -o $@ -c $< $(CFLAGS) $(INCFLAGS)
 
 $(LIB): $(OBJ) 
-	@gcc -fPIC -shared -o $(addprefix $(LIBDIR)/, $(LIB)) $^
+	@$(CC) -fPIC -shared -o $(LIB) $^
 
 $(TESTDIR)/%.o: $(TESTDIR)/%.cpp
 	@$(CC) -o $@ -c $< $(CFLAGS) $(INCFLAGS)
 
-$(TESTEXEC): $(TESTOBJ)
-	@$(CC) -o $@ $^ -L$(LIBDIR) -lcppunit -lhelloworld
+$(TESTEXEC): $(TESTOBJ) $(LIB)
+	@$(CC) -o $@ $^ -L$(LIBDIR) -lcppunit -l$(LIBNAME)
 
 test: $(TESTEXEC)
 	@LD_LIBRARY_PATH=LD_LIBRARY_PATH:./$(LIBDIR) ./$(TESTEXEC)
