@@ -2,10 +2,10 @@ CC=g++
 CFLAGS=-W -Wall -ansi -pedantic
 LDFLAGS=
 
-EXECDIR=exec
-EXEC=$(addprefix $(EXECDIR)/, helloworld)
+LIBDIR=lib
+LIB=libhelloworld.so
 
-INCDIR=include test
+INCDIR=include
 INCFLAGS=$(foreach d, $(INCDIR), -I$d)
 
 SRCDIR=source
@@ -19,7 +19,7 @@ TESTSRC=$(wildcard $(TESTDIR)/*.cpp)
 TESTOBJ=$(TESTSRC:.cpp=.o)
 TESTEXEC=$(addprefix $(TESTDIR)/, testexec)
 
-all: $(EXEC)
+all: $(LIB)
 
 .PHONY: clean mrproper doc
 
@@ -27,7 +27,7 @@ clean:
 	@rm -rf $(OBJ) $(TESTOBJ)
 
 mrproper: clean
-	@rm -rf $(EXEC) $(TESTEXEC)
+	@rm -rf $(addprefix $(LIBDIR)/, $(LIB)) $(TESTEXEC)
 
 doc:
 	@doxygen Doxyfile
@@ -35,12 +35,15 @@ doc:
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@$(CC) -o $@ -c $< $(CFLAGS) $(INCFLAGS)
 
-$(EXEC): $(OBJ) 
+$(LIB): $(OBJ) 
+	@gcc -fPIC -shared -o $(addprefix $(LIBDIR)/, $(LIB)) $^
 
 $(TESTDIR)/%.o: $(TESTDIR)/%.cpp
 	@$(CC) -o $@ -c $< $(CFLAGS) $(INCFLAGS)
 
-$(TESTEXEC): $(TESTOBJ) $(OBJ) 
-	@$(CC) -o $@ $^ -lcppunit
+$(TESTEXEC): $(TESTOBJ)
+	@$(CC) -o $@ $^ -L$(LIBDIR) -lcppunit -lhelloworld
 
 test: $(TESTEXEC)
+	@LD_LIBRARY_PATH=LD_LIBRARY_PATH:./$(LIBDIR) ./$(TESTEXEC)
+	
